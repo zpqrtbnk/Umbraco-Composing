@@ -1,4 +1,7 @@
 
+A work-in-progress solution for DI work in Umbraco v8.
+POC code that may or may never be implemented.
+
 Register
 --------
 
