@@ -41,8 +41,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="MsDiContainer.cs" />
+    <Compile Include="MsDiFactory.cs" />
+    <Compile Include="MsDiRegister.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TargetedService.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Umbraco.Core.Composing\Umbraco.Core.Composing.csproj">
