@@ -42,8 +42,20 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ContainerConformingTests.cs" />
+    <Compile Include="EnumerableTests.cs" />
+    <Compile Include="ForTests.cs" />
+    <Compile Include="ImplicitTests.cs" />
+    <Compile Include="LazyTests.cs" />
+    <Compile Include="Testing\IThing.cs" />
+    <Compile Include="RegisterSource.cs" />
+    <Compile Include="Testing\WithEnumerable.cs" />
     <Compile Include="Tests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Testing\WithLazy.cs" />
+    <Compile Include="Testing\Thing.cs" />
+    <Compile Include="Testing\Thing1.cs" />
+    <Compile Include="Testing\Thing2.cs" />
+    <Compile Include="TestsBase.cs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="NUnit">
@@ -61,6 +73,10 @@
     <ProjectReference Include="..\Umbraco.Core.Composing.LightInject\Umbraco.Core.Composing.LightInject.csproj">
       <Project>{27a5c01b-bc30-4052-ada9-5ec85b41855b}</Project>
       <Name>Umbraco.Core.Composing.LightInject</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Umbraco.Core.Composing.MsDi\Umbraco.Core.Composing.MsDi.csproj">
+      <Project>{d072da93-0b6d-461d-826f-42f5506fdbba}</Project>
+      <Name>Umbraco.Core.Composing.MsDi</Name>
     </ProjectReference>
     <ProjectReference Include="..\Umbraco.Core.Composing\Umbraco.Core.Composing.csproj">
       <Project>{db9ac8d6-a950-4971-9eb6-86ea7895143a}</Project>

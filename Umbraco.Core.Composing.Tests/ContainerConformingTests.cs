@@ -1,151 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
-using Umbraco.Core.Composing.LightInject;
+using Umbraco.Core.Composing.Tests.Testing;
 
 namespace Umbraco.Core.Composing.Tests
 {
     [TestFixture]
-    public class ContainerConformingTests
+    public class ContainerConformingTests : TestsBase
     {
-        // tests that a container conforms
-
-        private IRegister GetRegister() => LightInjectContainer.Create();
-
-        [Test]
-        public void CanRegisterAndGet()
+        [TestCaseSource(nameof(Registers))]
+        public void SingletonServiceIsUnique(string registerName) // fixme - but what is LightInject actually doing
         {
-            var register = GetRegister();
-
-            register.Register<Thing1>();
-
-            var factory = register.CreateFactory();
-
-            var thing = factory.GetInstance<Thing1>();
-            Assert.IsNotNull(thing);
-            Assert.IsInstanceOf<Thing1>(thing);
-        }
-
-        [Test]
-        public void CanRegisterAndGetLazy()
-        {
-            var register = GetRegister();
-
-            register.Register<Thing1>();
-
-            var factory = register.CreateFactory();
-
-            var lazyThing = factory.GetInstance<Lazy<Thing1>>();
-            Assert.IsNotNull(lazyThing);
-            Assert.IsInstanceOf<Lazy<Thing1>>(lazyThing);
-            var thing = lazyThing.Value;
-            Assert.IsNotNull(thing);
-            Assert.IsInstanceOf<Thing1>(thing);
-        }
-
-        [Test]
-        public void CannotRegistedAndGetBase()
-        {
-            var register = GetRegister();
-
-            register.Register<Thing1>();
-
-            var factory = register.CreateFactory();
-
-            Assert.IsNull(factory.TryGetInstance<ThingBase>());
-        }
-
-        [Test]
-        public void CannotRegisterAndGetInterface()
-        {
-            var register = GetRegister();
-
-            register.Register<Thing1>();
-
-            var factory = register.CreateFactory();
-
-            Assert.IsNull(factory.TryGetInstance<IThing>());
-        }
-
-        [Test]
-        public void CanRegisterAndGetAllBase()
-        {
-            var register = GetRegister();
-
-            register.Register<Thing1>();
-
-            var factory = register.CreateFactory();
-
-            var things = factory.GetAllInstances<ThingBase>();
-            Assert.AreEqual(1, things.Count());
-
-            // lightInject: would be zero with option EnableVariance set to false
-        }
-
-        [Test]
-        public void CanRegisterAndGetAllInterface()
-        {
-            var register = GetRegister();
-
-            register.Register<Thing1>();
-
-            var factory = register.CreateFactory();
-
-            var things = factory.GetAllInstances<IThing>();
-            Assert.AreEqual(1, things.Count());
-
-            // lightInject: would be zero with option EnableVariance set to false
-        }
-
-        [Test]
-        public void CanRegisterBaseAndGet()
-        {
-            var register = GetRegister();
-
-            register.Register<ThingBase, Thing1>();
-
-            var factory = register.CreateFactory();
-
-            var thing = factory.GetInstance<ThingBase>();
-            Assert.IsNotNull(thing);
-            Assert.IsInstanceOf<Thing1>(thing);
-        }
-
-        [Test]
-        public void CanRegisterInterfaceAndGet()
-        {
-            var register = GetRegister();
-
-            register.Register<IThing, Thing1>();
-
-            var factory = register.CreateFactory();
-
-            var thing = factory.GetInstance<IThing>();
-            Assert.IsNotNull(thing);
-            Assert.IsInstanceOf<Thing1>(thing);
-        }
-
-        [Test]
-        public void NonSingletonServiceIsNotUnique()
-        {
-            var register = GetRegister();
-
-            register.Register<IThing, Thing1>();
-            register.Register<IThing, Thing2>();
-
-            var factory = register.CreateFactory();
-
-            var things = factory.GetInstance<IEnumerable<IThing>>();
-            Assert.AreEqual(2, things.Count());
-
-            Assert.IsNull(factory.TryGetInstance<IThing>());
-        }
-
-        [Test]
-        public void SingletonServiceIsUnique() // fixme - but what is LightInject actually doing
-        {
-            var register = GetRegister();
+            var register = RegisterSource.CreateRegister(registerName);
 
             // fixme
             // LightInject is 'unique' per serviceType+serviceName
@@ -171,10 +37,10 @@ namespace Umbraco.Core.Composing.Tests
             Assert.IsInstanceOf<Thing2>(thing);
         }
 
-        [Test]
-        public void SingletonImplementationIsNotUnique()
+        [TestCaseSource(nameof(Registers))]
+        public void SingletonImplementationIsNotUnique(string registerName)
         {
-            var register = GetRegister();
+            var register = RegisterSource.CreateRegister(registerName);
 
             // define two implementations
             register.Register<Thing1>(Lifetime.Singleton);
@@ -188,10 +54,10 @@ namespace Umbraco.Core.Composing.Tests
             Assert.IsNull(factory.TryGetInstance<IThing>());
         }
 
-        [Test]
-        public void ActualInstanceIsNotUnique()
+        [TestCaseSource(nameof(Registers))]
+        public void ActualInstanceIsNotUnique(string registerName)
         {
-            var register = GetRegister();
+            var register = RegisterSource.CreateRegister(registerName);
 
             // define two instances
             register.RegisterInstance(typeof(Thing1), new Thing1());
@@ -206,10 +72,10 @@ namespace Umbraco.Core.Composing.Tests
             Assert.IsNull(factory.TryGetInstance<IThing>());
         }
 
-        [Test]
-        public void InterfaceInstanceIsNotUnique()
+        [TestCaseSource(nameof(Registers))]
+        public void InterfaceInstanceIsNotUnique(string registerName)
         {
-            var register = GetRegister();
+            var register = RegisterSource.CreateRegister(registerName);
 
             // define two instances
             register.RegisterInstance(typeof(IThing), new Thing1());
@@ -225,10 +91,10 @@ namespace Umbraco.Core.Composing.Tests
             Assert.IsNotNull(factory.TryGetInstance<IThing>()); // well, what?
         }
 
-        [Test]
-        public void CanInjectEnumerableOfBase()
+        [TestCaseSource(nameof(Registers))]
+        public void CanInjectEnumerableOfBase(string registerName)
         {
-            var register = GetRegister();
+            var register = RegisterSource.CreateRegister(registerName);
 
             register.Register<Thing1>();
             register.Register<Thing2>();
@@ -240,10 +106,10 @@ namespace Umbraco.Core.Composing.Tests
             Assert.AreEqual(2, needThings.Things.Count());
         }
 
-        [Test]
-        public void CanGetEnumerableOfBase()
+        [TestCaseSource(nameof(Registers))]
+        public void CanGetEnumerableOfBase(string registerName) // NOT SUPPORTED DON'T DO IT
         {
-            var register = GetRegister();
+            var register = RegisterSource.CreateRegister(registerName);
 
             register.Register<Thing1>();
             register.Register<Thing2>();
@@ -254,30 +120,10 @@ namespace Umbraco.Core.Composing.Tests
             Assert.AreEqual(2, things.Count());
         }
 
-        [Test]
-        public void CanGetEmptyEnumerableOfBase()
+        [TestCaseSource(nameof(Registers))]
+        public void CanTryGetEnumerableOfBase(string registerName) // NOT SUPPORTED DON'T DO IT
         {
-            var register = GetRegister();
-            var factory = register.CreateFactory();
-
-            var things = factory.GetInstance<IEnumerable<ThingBase>>();
-            Assert.AreEqual(0, things.Count());
-        }
-
-        [Test]
-        public void CanGetEmptyAllInstancesOfBase()
-        {
-            var register = GetRegister();
-            var factory = register.CreateFactory();
-
-            var things = factory.GetAllInstances<ThingBase>();
-            Assert.AreEqual(0, things.Count());
-        }
-
-        [Test]
-        public void CanTryGetEnumerableOfBase()
-        {
-            var register = GetRegister();
+            var register = RegisterSource.CreateRegister(registerName);
 
             register.Register<Thing1>();
             register.Register<Thing2>();
@@ -288,60 +134,9 @@ namespace Umbraco.Core.Composing.Tests
             Assert.AreEqual(2, things.Count());
         }
 
-        [Test]
-        public void CanRegisterSingletonInterface()
-        {
-            var register = GetRegister();
-            register.Register<IThing, Thing1>(Lifetime.Singleton);
-            var factory = register.CreateFactory();
-            var s1 = factory.GetInstance<IThing>();
-            var s2 = factory.GetInstance<IThing>();
-            Assert.AreSame(s1, s2);
-        }
-
-        [Test]
-        public void CanRegisterSingletonClass()
-        {
-            var register = GetRegister();
-            register.Register<Thing1>(Lifetime.Singleton);
-            var factory = register.CreateFactory();
-            var s1 = factory.GetInstance<Thing1>();
-            var s2 = factory.GetInstance<Thing1>();
-            Assert.AreSame(s1, s2);
-        }
-
-        [Test]
-        public void CanReRegisterSingletonInterface()
-        {
-            var register = GetRegister();
-            register.Register<IThing, Thing1>(Lifetime.Singleton);
-            register.Register<IThing, Thing2>(Lifetime.Singleton);
-            var factory = register.CreateFactory();
-            var s = factory.GetInstance<IThing>();
-            Assert.IsInstanceOf<Thing2>(s);
-        }
-
-        [Test]
-        public void CanRegisterSingletonWithCreate()
-        {
-            var register = GetRegister();
-            register.Register(c => c.CreateInstance<Thing3>(new Thing1()), Lifetime.Singleton);
-            var factory = register.CreateFactory();
-            var s1 = factory.GetInstance<Thing3>();
-            var s2 = factory.GetInstance<Thing3>();
-            Assert.AreSame(s1, s2);
-        }
-
-        public interface IThing { }
-
         public abstract class ThingBase : IThing { }
         public class Thing1 : ThingBase { }
         public class Thing2 : ThingBase { }
-
-        public class Thing3 : ThingBase
-        {
-            public Thing3(Thing1 thing) { }
-        }
 
         public class NeedThings
         {

@@ -11,6 +11,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Umbraco.Core.Composing.Cast
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Umbraco.Core.Composing.LightInject", "Umbraco.Core.Composing.LightInject\Umbraco.Core.Composing.LightInject.csproj", "{27A5C01B-BC30-4052-ADA9-5EC85B41855B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Umbraco.Core.Composing.MsDi", "Umbraco.Core.Composing.MsDi\Umbraco.Core.Composing.MsDi.csproj", "{D072DA93-0B6D-461D-826F-42F5506FDBBA}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution", "Solution", "{559690FF-CBD8-4EAE-A339-388927CF9C67}"
+	ProjectSection(SolutionItems) = preProject
+		readme.txt = readme.txt
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +40,10 @@ Global
 		{27A5C01B-BC30-4052-ADA9-5EC85B41855B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{27A5C01B-BC30-4052-ADA9-5EC85B41855B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{27A5C01B-BC30-4052-ADA9-5EC85B41855B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D072DA93-0B6D-461D-826F-42F5506FDBBA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D072DA93-0B6D-461D-826F-42F5506FDBBA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D072DA93-0B6D-461D-826F-42F5506FDBBA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D072DA93-0B6D-461D-826F-42F5506FDBBA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

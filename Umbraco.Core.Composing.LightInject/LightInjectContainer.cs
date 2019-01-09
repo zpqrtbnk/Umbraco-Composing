@@ -32,7 +32,11 @@ namespace Umbraco.Core.Composing.LightInject
         /// </summary>
         protected static ServiceContainer CreateServiceContainer()
         {
-            var container = new ServiceContainer(new ContainerOptions { EnablePropertyInjection = false });
+            var container = new ServiceContainer(new ContainerOptions
+            {
+                EnablePropertyInjection = false,
+                EnableVariance = false
+            });
 
             // note: the block below is disabled, as it is too LightInject-specific
             //
@@ -102,6 +106,8 @@ namespace Umbraco.Core.Composing.LightInject
         /// <inheritdoc />
         public IFactory CreateFactory() => this;
 
+        private static string GetTargetedServiceName<TTarget>() => "TARGET:" + typeof(TTarget).FullName;
+
         #region Factory
 
         /// <inheritdoc />
@@ -109,11 +115,16 @@ namespace Umbraco.Core.Composing.LightInject
             => Container.GetInstance(type);
 
         /// <inheritdoc />
+        public TService GetInstanceFor<TService, TTarget>()
+            => Container.GetInstance<TService>(GetTargetedServiceName<TTarget>());
+
+        /// <inheritdoc />
         public object TryGetInstance(Type type)
             => Container.TryGetInstance(type);
 
         /// <inheritdoc />
         public IEnumerable<T> GetAllInstances<T>()
+            where T : class
             => Container.GetAllInstances<T>();
 
         /// <inheritdoc />
@@ -139,19 +150,7 @@ namespace Umbraco.Core.Composing.LightInject
         /// <inheritdoc />
         public void Register(Type serviceType, Lifetime lifetime = Lifetime.Transient)
         {
-            switch (lifetime)
-            {
-                case Lifetime.Transient:
-                    Container.Register(serviceType);
-                    break;
-                case Lifetime.Request:
-                case Lifetime.Scope:
-                case Lifetime.Singleton:
-                    Container.Register(serviceType, GetLifetime(lifetime));
-                    break;
-                default:
-                    throw new NotSupportedException($"Lifetime {lifetime} is not supported.");
-            }
+            Container.Register(serviceType, GetLifetime(lifetime));
         }
 
         /// <inheritdoc />
@@ -160,12 +159,20 @@ namespace Umbraco.Core.Composing.LightInject
             switch (lifetime)
             {
                 case Lifetime.Transient:
-                    Container.Register(serviceType, implementingType, implementingType.Name);
+                    Container.Register(serviceType, implementingType, implementingType.Name); // fixme - why a name here?
                     break;
                 case Lifetime.Request:
                 case Lifetime.Scope:
-                case Lifetime.Singleton:
                     Container.Register(serviceType, implementingType, GetLifetime(lifetime));
+                    break;
+                case Lifetime.Singleton:
+                    // if serviceType != implementingType, we may end up registering several implementations
+                    // of the same serviceType, but LightInject overrides them when Lifetime is Singleton,
+                    // and we have to name them to make them distinct
+                    if (serviceType == implementingType)
+                        Container.Register(serviceType, implementingType, GetLifetime(lifetime));
+                    else
+                        Container.Register(serviceType, implementingType, Guid.NewGuid().ToString("N"), GetLifetime(lifetime));
                     break;
                 default:
                     throw new NotSupportedException($"Lifetime {lifetime} is not supported.");
@@ -173,21 +180,24 @@ namespace Umbraco.Core.Composing.LightInject
         }
 
         /// <inheritdoc />
-        public void Register<TService>(Func<IFactory, TService> factory, Lifetime lifetime = Lifetime.Transient)
+        public void RegisterFor<TService, TTarget>(Type implementingType, Lifetime lifetime = Lifetime.Transient)
+            where TService : class
         {
-            switch (lifetime)
-            {
-                case Lifetime.Transient:
-                    Container.Register(f => factory(this));
-                    break;
-                case Lifetime.Request:
-                case Lifetime.Scope:
-                case Lifetime.Singleton:
-                    Container.Register(f => factory(this), GetLifetime(lifetime));
-                    break;
-                default:
-                    throw new NotSupportedException($"Lifetime {lifetime} is not supported.");
-            }
+            Container.Register(typeof(TService), implementingType, GetTargetedServiceName<TTarget>(), GetLifetime(lifetime));
+        }
+
+        /// <inheritdoc />
+        public void Register<TService>(Func<IFactory, TService> factory, Lifetime lifetime = Lifetime.Transient)
+            where TService : class
+        {
+            Container.Register(f => factory(this), GetLifetime(lifetime));
+        }
+
+        /// <inheritdoc />
+        public void RegisterFor<TService, TTarget>(Func<IFactory, TService> factory, Lifetime lifetime = Lifetime.Transient)
+            where TService : class
+        {
+            Container.Register(f => factory(this), GetTargetedServiceName<TTarget>(), GetLifetime(lifetime));
         }
 
         private ILifetime GetLifetime(Lifetime lifetime)
@@ -210,6 +220,11 @@ namespace Umbraco.Core.Composing.LightInject
         /// <inheritdoc />
         public void RegisterInstance(Type serviceType, object instance)
             => Container.RegisterInstance(serviceType, instance);
+
+        /// <inheritdoc />
+        public void RegisterInstanceFor<TService, TTarget>(TService instance)
+            where TService : class
+            => Container.RegisterInstance(typeof(TService), instance, GetTargetedServiceName<TTarget>());
 
         /// <inheritdoc />
         public void RegisterAuto(Type serviceBaseType)
